@@ -737,7 +737,7 @@
     "@type": "OrderAction",
     "target": {
       "@type": "EntryPoint",
-      "urlTemplate": "https://menu.fu.do/wariobross",
+      "urlTemplate": "https://wario-bross.vercel.app/#menu",
       "actionPlatform": [
         "http://schema.org/DesktopWebPlatform",
         "http://schema.org/MobileWebPlatform"
@@ -1261,7 +1261,7 @@ button:focus-visible{
 }
 
 /* ============================================================
-   9) MODAL DE DETALLE DE PRODUCTO (solo lectura + CTA a FUDO)
+   9) MODAL DE DETALLE DE PRODUCTO (detalle + CTA "Adicionar a mi pedido")
 ============================================================= */
 .modal-overlay{
   position:fixed; inset:0; z-index:400;
@@ -1703,6 +1703,219 @@ button:focus-visible{
 
 }
 
+/* ============================================================
+   10) SISTEMA DE CARRITO Y PEDIDO
+   Sistema de pedidos propio (frontend + WhatsApp). Reutiliza
+   variables de marca ya definidas en :root y las clases .btn,
+   .btn-cta, .btn-outline y .modal-cerrar existentes.
+============================================================= */
+
+/* Botón de acceso al carrito (header) */
+.btn-carrito{
+  position: relative;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 999px;
+  background: var(--color-superficie-2);
+  border: 2px solid var(--color-borde);
+  color: var(--color-texto);
+  font-family: var(--fuente-seccion); font-weight: 700; font-size: 14px;
+  min-height: 44px; min-width: 44px;
+  transition: background .15s ease, border-color .15s ease;
+}
+.btn-carrito:hover{ background: #fff; border-color: var(--color-cta); }
+.btn-carrito-icono{ font-size: 18px; line-height: 1; }
+.btn-carrito-texto{ white-space: nowrap; }
+.btn-carrito-badge{
+  position: absolute; top: -6px; right: -6px;
+  background: var(--color-cta); color: #fff;
+  font-size: 11px; font-weight: 800; line-height: 1;
+  min-width: 20px; height: 20px; padding: 0 4px;
+  border-radius: 999px; display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--sombra-cta);
+}
+.btn-carrito-badge[hidden]{ display: none; }
+@media (max-width: 480px){
+  .btn-carrito-texto{ display: none; }
+  .btn-carrito{ padding: 10px 12px; }
+  .header-inner{ gap: 8px; padding: 0 12px; }
+  .header-actions{ gap: 6px; }
+  .header-actions .btn-cta{ padding: 10px 14px; font-size: 12px; }
+}
+
+/* Overlay */
+.carrito-overlay{
+  position: fixed; inset: 0; z-index: 450;
+  background: rgba(18,18,29,.60);
+}
+.carrito-overlay[hidden]{ display: none; }
+
+/* Panel lateral */
+.carrito-panel{
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 500;
+  width: min(420px, 100vw);
+  max-width: 100vw;
+  background: var(--color-fondo);
+  box-shadow: -8px 0 28px rgba(18,18,29,.22);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  transform: translateX(0);
+  animation: entrarCarrito .22s ease;
+}
+.carrito-panel[hidden]{ display: none; }
+@keyframes entrarCarrito{
+  from{ transform: translateX(100%); }
+  to{ transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce){
+  .carrito-panel{ animation: none; }
+}
+
+.carrito-vista{
+  display: flex; flex-direction: column;
+  height: 100%; overflow-y: auto;
+  padding: 20px;
+}
+.carrito-vista[hidden]{ display: none; }
+
+.carrito-panel-header{
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 16px;
+}
+.carrito-panel-header h2{
+  font-family: var(--fuente-seccion); font-size: 22px;
+}
+.carrito-volver{
+  background: transparent; border: none; color: var(--color-texto);
+  font-family: var(--fuente-seccion); font-weight: 700; font-size: 14px;
+  padding: 8px 4px; min-height: 44px;
+}
+.carrito-volver:hover{ color: var(--color-cta); }
+
+/* Lista de productos en el carrito */
+.carrito-lista{ display: flex; flex-direction: column; gap: 12px; flex: 1 0 auto; }
+
+.carrito-item{
+  display: grid; grid-template-columns: 64px 1fr auto;
+  gap: 12px; align-items: start;
+  padding: 12px; border-radius: var(--radio-sm);
+  background: var(--color-superficie); border: 1px solid var(--color-borde);
+}
+.carrito-item-img{
+  width: 64px; height: 64px; border-radius: 10px; overflow: hidden;
+  background: var(--color-superficie-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+}
+.carrito-item-img img{ width: 100%; height: 100%; object-fit: cover; }
+
+.carrito-item-info{ display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.carrito-item-nombre{ font-weight: 700; font-size: 14.5px; }
+.carrito-item-precio-unit{ font-size: 12.5px; color: var(--color-texto-sutil); }
+.carrito-item-qty{ display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.carrito-item-qty button{
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid var(--color-borde); background: var(--color-superficie-2);
+  font-weight: 800; font-size: 16px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.carrito-item-qty button:hover{ border-color: var(--color-cta); color: var(--color-cta); }
+.carrito-item-qty span{ min-width: 22px; text-align: center; font-weight: 700; }
+
+.carrito-item-derecha{
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+  text-align: right;
+}
+.carrito-item-subtotal{ font-weight: 800; font-family: var(--fuente-seccion); }
+.carrito-item-eliminar{
+  background: transparent; border: none; color: var(--color-texto-sutil);
+  font-size: 13px; text-decoration: underline; padding: 4px; min-height: 32px;
+}
+.carrito-item-eliminar:hover{ color: var(--color-cta); }
+
+/* Estado vacío */
+.carrito-vacio{
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; gap: 16px; padding: 32px 12px;
+  color: var(--color-texto-sutil);
+}
+.carrito-vacio[hidden]{ display: none; }
+
+/* Resumen del carrito */
+.carrito-resumen{ margin-top: 16px; border-top: 2px solid var(--color-borde); padding-top: 14px; }
+.carrito-resumen[hidden]{ display: none; }
+.carrito-resumen-fila{
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 14.5px; padding: 5px 0; color: var(--color-texto-sutil);
+}
+.carrito-resumen-total{
+  color: var(--color-texto); font-weight: 800; font-size: 17px;
+  font-family: var(--fuente-seccion);
+}
+.carrito-acciones{ display: flex; gap: 10px; margin-top: 12px; }
+.carrito-acciones .btn{ flex: 1; }
+.carrito-acciones .btn[disabled]{ opacity: .5; cursor: not-allowed; }
+
+/* Formulario de datos */
+.form-pedido{ display: flex; flex-direction: column; gap: 16px; padding-bottom: 20px; }
+.form-pedido h2{ font-family: var(--fuente-seccion); font-size: 22px; }
+
+.campo{ display: flex; flex-direction: column; gap: 6px; }
+.campo label{ font-weight: 700; font-size: 13.5px; }
+.campo input[type="text"],
+.campo input[type="tel"]{
+  padding: 11px 14px; border-radius: var(--radio-sm);
+  border: 2px solid var(--color-borde); background: var(--color-superficie);
+  font: inherit; font-size: 15px; min-height: 44px;
+}
+.campo input:focus-visible{ outline: 3px solid var(--color-teal); outline-offset: 1px; }
+.campo input[aria-invalid="true"]{ border-color: var(--color-cta); }
+.campo-error{ color: var(--color-cta); font-size: 12.5px; font-weight: 600; }
+.campo-error[hidden]{ display: none; }
+.campo-grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 480px){ .campo-grid{ grid-template-columns: 1fr; } }
+
+.campo-fieldset{ border: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.campo-fieldset legend{ font-weight: 700; font-size: 13.5px; padding: 0 0 4px; }
+
+.tipo-pedido-opciones, .forma-pago-opciones{ display: flex; flex-direction: column; gap: 8px; }
+.tipo-pedido-opcion{
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: var(--radio-sm);
+  border: 2px solid var(--color-borde); background: var(--color-superficie);
+  cursor: pointer; min-height: 44px; font-size: 14.5px;
+}
+.tipo-pedido-opcion:has(input:checked){ border-color: var(--color-cta); background: #FDF1F1; }
+.tipo-pedido-opcion input{ width: 18px; height: 18px; accent-color: var(--color-cta); }
+
+.bloque-domicilio, .bloque-recoger{
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 14px; border-radius: var(--radio-sm);
+  background: var(--color-superficie-2);
+}
+.bloque-domicilio[hidden], .bloque-recoger[hidden]{ display: none; }
+.bloque-recoger-direccion{ font-weight: 700; }
+.aviso-envio{ font-size: 12.5px; color: var(--color-texto-sutil); font-style: italic; }
+
+/* Resumen final antes de enviar */
+.pedido-resumen-final{
+  border: 2px solid var(--color-borde); border-radius: var(--radio-sm);
+  padding: 14px; background: var(--color-superficie);
+}
+.pedido-resumen-final h3{ font-family: var(--fuente-seccion); font-size: 16px; margin-bottom: 8px; }
+.resumen-productos{ display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.resumen-producto-fila{
+  display: flex; justify-content: space-between; gap: 10px;
+  font-size: 13.5px; color: var(--color-texto-sutil);
+}
+#resumenEnvioFila[data-estado="pendiente"] #resumenEnvio{ color: var(--color-cta); font-weight: 700; }
+
+.btn-enviar-pedido{ width: 100%; }
+.aviso-whatsapp{
+  font-size: 13px; text-align: center; color: var(--color-texto-sutil);
+  background: var(--color-superficie-2); border-radius: var(--radio-sm); padding: 10px;
+}
+.aviso-whatsapp[hidden]{ display: none; }
+
 </style>
 </head>
 <body>
@@ -1727,9 +1940,14 @@ button:focus-visible{
     </nav>
 
     <div class="header-actions">
-      <a class="btn btn-cta" href="https://menu.fu.do/wariobross" target="_blank" rel="noopener noreferrer" data-fudo-link>
+      <a class="btn btn-cta" href="#menu">
         Pedir ahora
       </a>
+      <button type="button" class="btn-carrito" id="btnAbrirCarrito" aria-expanded="false" aria-controls="carritoPanel" aria-label="Abrir carrito, 0 productos">
+        <span class="btn-carrito-icono" aria-hidden="true">🛒</span>
+        <span class="btn-carrito-texto">Carrito</span>
+        <span class="btn-carrito-badge" id="carritoBadge" hidden>0</span>
+      </button>
       <button class="header-toggle" id="headerToggle" aria-expanded="false" aria-controls="headerNav" aria-label="Abrir menú de navegación">
         <span></span><span></span><span></span>
       </button>
@@ -1757,7 +1975,7 @@ button:focus-visible{
         </p>
       </div>
       <div class="hero-actions">
-        <a class="btn btn-cta btn-lg" href="https://menu.fu.do/wariobross" target="_blank" rel="noopener noreferrer" data-fudo-link>
+        <a class="btn btn-cta btn-lg" href="#menu">
           Pedir ahora
         </a>
         <a class="btn btn-outline btn-lg" href="#menu">Ver el menú</a>
@@ -1795,7 +2013,7 @@ button:focus-visible{
 
           <article>
             <h3>¿Cómo puedo hacer un pedido en Wario Bross?</h3>
-            <p>Puedes explorar el menú completo en esta página y pedir en línea a través de nuestra plataforma oficial de pedidos, tocando el botón "Pedir ahora".</p>
+            <p>Puedes explorar el menú completo en esta misma página, agregar tus productos favoritos al carrito y enviar tu pedido directamente por WhatsApp tocando el botón "Pedir ahora" o "Enviar pedido".</p>
           </article>
 
           <article>
@@ -1805,7 +2023,7 @@ button:focus-visible{
 
           <article>
             <h3>¿Wario Bross tiene servicio a domicilio?</h3>
-            <p>Sí. Los pedidos, tanto para domicilio como para recoger en el local, se gestionan a través de nuestra plataforma oficial de pedidos en línea.</p>
+            <p>Sí. Puedes elegir domicilio o recoger en el local directamente desde el carrito de esta página, y el pedido se envía por WhatsApp al restaurante.</p>
           </article>
         </div>
       </div>
@@ -1860,7 +2078,8 @@ button:focus-visible{
 <!-- ======================================
      MODAL DE DETALLE DE PRODUCTO
      Instancia única y reutilizable, poblada por JS a partir
-     del array MENU. Solo lectura + CTA hacia FUDO.
+     del array MENU. El botón agrega el producto al carrito
+     lateral (sistema de pedidos propio, sin FUDO).
 ======================================= -->
 <div class="modal-overlay" id="modalProducto" hidden>
   <div class="modal-detalle" role="dialog" aria-modal="true" aria-labelledby="modalProductoNombre" tabindex="-1">
@@ -1871,12 +2090,170 @@ button:focus-visible{
       <h2 id="modalProductoNombre"></h2>
       <p id="modalDesc"></p>
       <p class="modal-precio" id="modalPrecio"></p>
-      <a class="btn btn-cta" id="modalCtaFudo" href="https://menu.fu.do/wariobross" target="_blank" rel="noopener noreferrer" data-fudo-link>
-        Pedir en FUDO
-      </a>
+      <button type="button" class="btn btn-cta" id="modalAgregarCarrito">
+        Adicionar a mi pedido
+      </button>
     </div>
   </div>
 </div>
+
+<!-- ======================================
+     CARRITO LATERAL + FORMULARIO DE PEDIDO
+     Sistema de pedidos propio (frontend + WhatsApp, sin FUDO).
+     Un único panel deslizante con dos vistas internas:
+     "carrito" (lista de productos) y "datos" (formulario +
+     resumen). El estado se controla desde JS (CarritoUI).
+======================================= -->
+<div class="carrito-overlay" id="carritoOverlay" hidden></div>
+
+<aside class="carrito-panel" id="carritoPanel" role="dialog" aria-modal="true" aria-label="Carrito de pedido" hidden tabindex="-1">
+
+  <!-- VISTA 1: CARRITO -->
+  <div class="carrito-vista" id="carritoVista">
+    <div class="carrito-panel-header">
+      <h2>Tu pedido</h2>
+      <button type="button" class="modal-cerrar" id="carritoCerrar" aria-label="Cerrar carrito">✕</button>
+    </div>
+
+    <div class="carrito-lista" id="carritoLista" aria-live="polite"></div>
+
+    <div class="carrito-vacio" id="carritoVacio" hidden>
+      <p>Tu carrito está vacío. ¡Agrega tus favoritos y arma tu pedido!</p>
+      <a href="#menu" class="btn btn-outline" id="carritoVerMenu">Explorar el menú</a>
+    </div>
+
+    <div class="carrito-resumen" id="carritoResumen" hidden>
+      <div class="carrito-resumen-fila">
+        <span>Unidades</span>
+        <span id="carritoUnidades">0</span>
+      </div>
+      <div class="carrito-resumen-fila carrito-resumen-total">
+        <span>Subtotal</span>
+        <span id="carritoSubtotal">$0</span>
+      </div>
+      <div class="carrito-acciones">
+        <button type="button" class="btn btn-outline" id="carritoVaciar">Vaciar carrito</button>
+        <button type="button" class="btn btn-cta" id="carritoTusDatos" disabled>Tus datos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA 2: DATOS DEL CLIENTE + RESUMEN + ENVÍO -->
+  <div class="carrito-vista" id="datosVista" hidden>
+    <div class="carrito-panel-header">
+      <button type="button" class="carrito-volver" id="datosVolver" aria-label="Volver al carrito">← Volver al carrito</button>
+      <button type="button" class="modal-cerrar" id="datosCerrar" aria-label="Cerrar carrito">✕</button>
+    </div>
+
+    <form id="formPedido" class="form-pedido" novalidate>
+      <h2>Tus datos</h2>
+
+      <div class="campo">
+        <label for="campoNombre">Nombre y apellido</label>
+        <input type="text" id="campoNombre" name="nombre" autocomplete="name" required maxlength="80">
+        <p class="campo-error" id="errorNombre" hidden></p>
+      </div>
+
+      <div class="campo">
+        <label for="campoCelular">Número de celular</label>
+        <input type="tel" id="campoCelular" name="celular" autocomplete="tel" inputmode="numeric" required maxlength="20" placeholder="300 000 0000">
+        <p class="campo-error" id="errorCelular" hidden></p>
+      </div>
+
+      <fieldset class="campo-fieldset">
+        <legend>Tipo de pedido</legend>
+        <div class="tipo-pedido-opciones">
+          <label class="tipo-pedido-opcion">
+            <input type="radio" name="tipoPedido" value="domicilio" id="tipoDomicilio" required>
+            <span>Domicilio</span>
+          </label>
+          <label class="tipo-pedido-opcion">
+            <input type="radio" name="tipoPedido" value="recoger" id="tipoRecoger" required>
+            <span>Recoger en el restaurante</span>
+          </label>
+        </div>
+        <p class="campo-error" id="errorTipoPedido" hidden></p>
+      </fieldset>
+
+      <div id="bloqueDomicilio" class="bloque-domicilio" hidden>
+        <div class="campo">
+          <label for="campoDireccion">Dirección completa</label>
+          <input type="text" id="campoDireccion" name="direccion" autocomplete="street-address" maxlength="120">
+          <p class="campo-error" id="errorDireccion" hidden></p>
+        </div>
+        <div class="campo-grid">
+          <div class="campo">
+            <label for="campoCasa">Casa</label>
+            <input type="text" id="campoCasa" name="casa" maxlength="30" placeholder="No aplica">
+          </div>
+          <div class="campo">
+            <label for="campoApartamento">Apartamento</label>
+            <input type="text" id="campoApartamento" name="apartamento" maxlength="30" placeholder="No aplica">
+          </div>
+          <div class="campo">
+            <label for="campoTorre">Torre</label>
+            <input type="text" id="campoTorre" name="torre" maxlength="30" placeholder="No aplica">
+          </div>
+        </div>
+        <div class="campo">
+          <label for="campoBarrio">Barrio</label>
+          <input type="text" id="campoBarrio" name="barrio" autocomplete="address-level3" maxlength="60">
+          <p class="campo-error" id="errorBarrio" hidden></p>
+        </div>
+        <div class="campo">
+          <label for="campoReferencia">Referencia adicional (opcional)</label>
+          <input type="text" id="campoReferencia" name="referencia" maxlength="120">
+        </div>
+        <p class="aviso-envio">Los gastos de envío se informarán una vez se confirme tu pedido.</p>
+      </div>
+
+      <div id="bloqueRecoger" class="bloque-recoger" hidden>
+        <p>Tu pedido será para recoger en el restaurante:</p>
+        <p class="bloque-recoger-direccion">Cra. 85C # 43-69, El Caney, Cali, Colombia</p>
+      </div>
+
+      <fieldset class="campo-fieldset">
+        <legend>Forma de pago</legend>
+        <div class="forma-pago-opciones">
+          <label class="tipo-pedido-opcion">
+            <input type="radio" name="formaPago" value="Efectivo" required>
+            <span>Efectivo</span>
+          </label>
+          <label class="tipo-pedido-opcion">
+            <input type="radio" name="formaPago" value="Transferencia bancaria" required>
+            <span>Transferencia bancaria</span>
+          </label>
+          <label class="tipo-pedido-opcion">
+            <input type="radio" name="formaPago" value="Tarjeta débito/crédito" required>
+            <span>Tarjeta débito/crédito</span>
+          </label>
+        </div>
+        <p class="campo-error" id="errorFormaPago" hidden></p>
+      </fieldset>
+
+      <div class="pedido-resumen-final" id="pedidoResumenFinal" aria-live="polite">
+        <h3>Resumen del pedido</h3>
+        <div id="resumenProductos" class="resumen-productos"></div>
+        <div class="carrito-resumen-fila">
+          <span>Subtotal de productos</span>
+          <span id="resumenSubtotal">$0</span>
+        </div>
+        <div class="carrito-resumen-fila" id="resumenEnvioFila">
+          <span>Envío</span>
+          <span id="resumenEnvio">—</span>
+        </div>
+        <div class="carrito-resumen-fila carrito-resumen-total">
+          <span>Total de productos</span>
+          <span id="resumenTotal">$0</span>
+        </div>
+        <p class="aviso-envio" id="resumenAvisoEnvio" hidden>Los gastos de envío se informarán una vez se confirme tu pedido.</p>
+      </div>
+
+      <button type="submit" class="btn btn-cta btn-lg btn-enviar-pedido" id="btnEnviarPedido">Enviar pedido</button>
+      <p class="aviso-whatsapp" id="avisoWhatsapp" role="status" aria-live="polite" hidden></p>
+    </form>
+  </div>
+</aside>
 
 <!-- ======================================
      FOOTER / INFORMACIÓN DEL RESTAURANTE
@@ -1888,7 +2265,7 @@ button:focus-visible{
         <img class="footer-brand-logo" src="img/brand/logo-wario-bross-192.png" alt="Wario Bross" width="82" height="82">
         <h2 id="footerMarca">Wario Bross</h2>
         <p>Restaurante de comida rápida en El Caney, Cali, especializado en hamburguesas artesanales, perros calientes, asados a la parrilla y salchipapas.</p>
-        <div class="footer-cta"><a class="btn btn-cta" href="https://menu.fu.do/wariobross" target="_blank" rel="noopener noreferrer" data-fudo-link>Pedir ahora</a></div>
+        <div class="footer-cta"><a class="btn btn-cta" href="#menu">Pedir ahora</a></div>
       </section>
 
       <nav aria-label="Navegación del pie de página">
@@ -1932,7 +2309,6 @@ button:focus-visible{
    valores aquí: todo debe provenir de información confirmada.
 ============================================================= */
 const CONFIG = Object.freeze({
-  fudoUrl: "https://menu.fu.do/wariobross",
   whatsappNumber: "573214477999",
   instagramHandle: "@warioburger",
   instagramUrl: "https://instagram.com/warioburger",
@@ -1963,16 +2339,6 @@ function renderizarFooter(){
   document.querySelectorAll('[data-instagram-link]').forEach(function(el){el.href=CONFIG.instagramUrl;el.textContent=CONFIG.instagramHandle;});
 }
 renderizarFooter();
-
-/* Sincroniza TODOS los CTA hacia FUDO desde una única variable.
-   El href ya viene correcto en el HTML (resiliencia sin JS / SEO);
-   esto solo garantiza que un futuro cambio de URL se propague. */
-function sincronizarEnlacesFudo(){
-  document.querySelectorAll('[data-fudo-link]').forEach(function(el){
-    el.href = CONFIG.fudoUrl;
-  });
-}
-sincronizarEnlacesFudo();
 
 /* ============================================================
    DATOS DEL MENÚ
@@ -2159,6 +2525,13 @@ function crearMediaProducto(cat, prod, tamano){
   return media;
 }
 
+/* Id determinista por producto (categoría+índice), estable
+   mientras no se reordene el array MENU. No se inventa dato
+   alguno: se deriva de la posición real en el catálogo. */
+function generarIdProducto(idxCat, idxProd){
+  return 'p-' + idxCat + '-' + idxProd;
+}
+
 function renderizarMenu(){
   const contenedor = document.getElementById('menuCategorias');
   if(!contenedor) return;
@@ -2220,8 +2593,10 @@ function renderizarMenu(){
       info.appendChild(precio);
 
       boton.appendChild(info);
+      const idProducto = generarIdProducto(idxCat, idxProd);
+      boton.dataset.productoId = idProducto;
       boton.addEventListener('click', function(){
-        abrirDetalleProducto(cat, prod, boton);
+        abrirDetalleProducto(cat, prod, boton, idProducto);
       });
 
       li.appendChild(boton);
@@ -2316,9 +2691,17 @@ renderizarResenas();
    atrapado, Escape cierra, el foco regresa al disparador.
 ============================================================= */
 let elementoActivadorModal = null;
+let productoActivoModal = null; /* { id, nombre, precio, imagen, categoria } del producto abierto en el modal */
 
-function abrirDetalleProducto(cat, prod, elementoActivador){
+function abrirDetalleProducto(cat, prod, elementoActivador, idProducto){
   elementoActivadorModal = elementoActivador || null;
+  productoActivoModal = {
+    id: idProducto || generarIdProducto(-1, -1),
+    nombre: prod.nombre,
+    precio: prod.precio,
+    imagen: prod.imagen || '',
+    categoria: cat.categoria
+  };
 
   const media = document.getElementById('modalMedia');
   media.innerHTML = '';
@@ -2388,12 +2771,21 @@ function manejarTeclaModal(e){
 (function initModalProducto(){
   const overlay = document.getElementById('modalProducto');
   const cerrar = document.getElementById('modalCerrar');
+  const agregar = document.getElementById('modalAgregarCarrito');
   if(!overlay || !cerrar) return;
 
   cerrar.addEventListener('click', cerrarDetalleProducto);
   overlay.addEventListener('click', function(e){
     if(e.target === overlay) cerrarDetalleProducto();
   });
+
+  if(agregar){
+    agregar.addEventListener('click', function(){
+      if(!productoActivoModal) return;
+      CarritoState.agregar(productoActivoModal);
+      cerrarDetalleProducto();
+    });
+  }
 })();
 
 /* ============================================================
@@ -2490,6 +2882,651 @@ function manejarTeclaModal(e){
   }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
 
   mapa.forEach(function(_, seccion){ observer.observe(seccion); });
+})();
+
+/* ============================================================
+   11) SISTEMA DE PEDIDOS — CARRITO + FORMULARIO + WHATSAPP
+   Frontend + WhatsApp, sin backend. Fuente única de verdad:
+   CarritoState. Persistencia en localStorage con validación
+   de datos corruptos. Los precios usados en el mensaje final
+   se calculan siempre desde CarritoState + CONFIG, nunca desde
+   texto libre editable por el usuario.
+============================================================= */
+
+/* ---------- 11.1 Precios: validación y formato ---------- */
+
+/* Formato de precio para el carrito y el mensaje de WhatsApp,
+   sin sufijo "COP" (ej: $63.900). formatoCOP() se deja intacta
+   porque ya se usa en el menú y el modal de producto. */
+function formatoPrecio(valor){
+  const numero = Number(valor);
+  if(!Number.isFinite(numero) || numero < 0) return '$0';
+  return '$' + Math.round(numero).toLocaleString('es-CO');
+}
+
+function precioValido(valor){
+  const numero = Number(valor);
+  return Number.isFinite(numero) && numero >= 0;
+}
+
+/* ---------- 11.2 Estado del carrito (única fuente de verdad) ---------- */
+
+const CARRITO_STORAGE_KEY = 'warioBrossCart';
+const CARRITO_STORAGE_VERSION = 1;
+
+const CarritoState = (function(){
+  let items = [];
+  const listeners = [];
+
+  function cargar(){
+    try{
+      const crudo = window.localStorage.getItem(CARRITO_STORAGE_KEY);
+      if(!crudo){ items = []; return; }
+      const datos = JSON.parse(crudo);
+      if(!datos || datos.version !== CARRITO_STORAGE_VERSION || !Array.isArray(datos.items)){
+        items = [];
+        window.localStorage.removeItem(CARRITO_STORAGE_KEY);
+        return;
+      }
+      items = datos.items.filter(function(it){
+        return it && typeof it.id === 'string' && typeof it.nombre === 'string' &&
+               precioValido(it.precio) &&
+               Number.isInteger(it.cantidad) && it.cantidad >= 1;
+      }).map(function(it){
+        return {
+          id: it.id,
+          nombre: it.nombre,
+          precio: Number(it.precio),
+          imagen: typeof it.imagen === 'string' ? it.imagen : '',
+          categoria: typeof it.categoria === 'string' ? it.categoria : '',
+          cantidad: it.cantidad
+        };
+      });
+    } catch(err){
+      /* localStorage no disponible o datos corruptos: iniciar carrito vacío de forma segura */
+      items = [];
+      try{ window.localStorage.removeItem(CARRITO_STORAGE_KEY); } catch(e2){ /* noop */ }
+    }
+  }
+
+  function guardar(){
+    try{
+      if(items.length === 0){
+        window.localStorage.removeItem(CARRITO_STORAGE_KEY);
+        return;
+      }
+      window.localStorage.setItem(CARRITO_STORAGE_KEY, JSON.stringify({
+        version: CARRITO_STORAGE_VERSION,
+        items: items
+      }));
+    } catch(err){
+      /* Si el almacenamiento falla (modo privado, cuota, etc.),
+         el carrito sigue funcionando en memoria durante la sesión. */
+    }
+  }
+
+  function notificar(){
+    guardar();
+    listeners.forEach(function(fn){ fn(items.slice()); });
+  }
+
+  function onChange(fn){
+    if(typeof fn === 'function') listeners.push(fn);
+  }
+
+  function agregar(producto){
+    if(!producto || typeof producto.id !== 'string' || !producto.id) return;
+    if(!precioValido(producto.precio)) return;
+    const existente = items.find(function(it){ return it.id === producto.id; });
+    if(existente){
+      existente.cantidad += 1;
+    } else {
+      items.push({
+        id: producto.id,
+        nombre: String(producto.nombre || ''),
+        precio: Number(producto.precio),
+        imagen: producto.imagen || '',
+        categoria: producto.categoria || '',
+        cantidad: 1
+      });
+    }
+    notificar();
+  }
+
+  function incrementar(id){
+    const it = items.find(function(x){ return x.id === id; });
+    if(it){ it.cantidad += 1; notificar(); }
+  }
+
+  function decrementar(id){
+    const it = items.find(function(x){ return x.id === id; });
+    if(!it) return;
+    if(it.cantidad > 1){
+      it.cantidad -= 1;
+      notificar();
+    } else {
+      const confirmarEliminar = window.confirm('¿Eliminar "' + it.nombre + '" del carrito?');
+      if(confirmarEliminar) eliminar(id);
+    }
+  }
+
+  function eliminar(id){
+    items = items.filter(function(x){ return x.id !== id; });
+    notificar();
+  }
+
+  function vaciar(){
+    items = [];
+    notificar();
+  }
+
+  function getItems(){ return items.slice(); }
+
+  function totalUnidades(){
+    return items.reduce(function(sum, it){ return sum + it.cantidad; }, 0);
+  }
+
+  function subtotal(){
+    return items.reduce(function(sum, it){ return sum + (it.precio * it.cantidad); }, 0);
+  }
+
+  cargar();
+
+  return {
+    agregar: agregar,
+    incrementar: incrementar,
+    decrementar: decrementar,
+    eliminar: eliminar,
+    vaciar: vaciar,
+    getItems: getItems,
+    totalUnidades: totalUnidades,
+    subtotal: subtotal,
+    onChange: onChange
+  };
+})();
+
+/* ---------- 11.3 Render del panel del carrito ---------- */
+
+function crearFilaCarrito(item){
+  const fila = document.createElement('div');
+  fila.className = 'carrito-item';
+
+  const imgWrap = document.createElement('div');
+  imgWrap.className = 'carrito-item-img';
+  if(item.imagen){
+    const img = document.createElement('img');
+    img.src = item.imagen;
+    img.alt = '';
+    imgWrap.appendChild(img);
+  } else {
+    imgWrap.textContent = '🍔';
+  }
+
+  const info = document.createElement('div');
+  info.className = 'carrito-item-info';
+
+  const nombre = document.createElement('span');
+  nombre.className = 'carrito-item-nombre';
+  nombre.textContent = item.nombre;
+
+  const precioUnit = document.createElement('span');
+  precioUnit.className = 'carrito-item-precio-unit';
+  precioUnit.textContent = formatoPrecio(item.precio) + ' c/u';
+
+  const qty = document.createElement('div');
+  qty.className = 'carrito-item-qty';
+
+  const btnMenos = document.createElement('button');
+  btnMenos.type = 'button';
+  btnMenos.textContent = '−';
+  btnMenos.setAttribute('aria-label', 'Disminuir cantidad de ' + item.nombre);
+  btnMenos.addEventListener('click', function(){ CarritoState.decrementar(item.id); });
+
+  const spanQty = document.createElement('span');
+  spanQty.textContent = String(item.cantidad);
+  spanQty.setAttribute('aria-label', 'Cantidad: ' + item.cantidad);
+
+  const btnMas = document.createElement('button');
+  btnMas.type = 'button';
+  btnMas.textContent = '+';
+  btnMas.setAttribute('aria-label', 'Aumentar cantidad de ' + item.nombre);
+  btnMas.addEventListener('click', function(){ CarritoState.incrementar(item.id); });
+
+  qty.append(btnMenos, spanQty, btnMas);
+  info.append(nombre, precioUnit, qty);
+
+  const derecha = document.createElement('div');
+  derecha.className = 'carrito-item-derecha';
+
+  const subtotalSpan = document.createElement('span');
+  subtotalSpan.className = 'carrito-item-subtotal';
+  subtotalSpan.textContent = formatoPrecio(item.precio * item.cantidad);
+
+  const btnEliminar = document.createElement('button');
+  btnEliminar.type = 'button';
+  btnEliminar.className = 'carrito-item-eliminar';
+  btnEliminar.textContent = 'Eliminar';
+  btnEliminar.setAttribute('aria-label', 'Eliminar ' + item.nombre + ' del carrito');
+  btnEliminar.addEventListener('click', function(){ CarritoState.eliminar(item.id); });
+
+  derecha.append(subtotalSpan, btnEliminar);
+  fila.append(imgWrap, info, derecha);
+  return fila;
+}
+
+function renderizarCarrito(){
+  const items = CarritoState.getItems();
+  const lista = document.getElementById('carritoLista');
+  const vacio = document.getElementById('carritoVacio');
+  const resumen = document.getElementById('carritoResumen');
+  const btnTusDatos = document.getElementById('carritoTusDatos');
+  if(!lista) return;
+
+  lista.innerHTML = '';
+
+  if(items.length === 0){
+    vacio.hidden = false;
+    resumen.hidden = true;
+    if(btnTusDatos) btnTusDatos.disabled = true;
+    /* Carrito vacío: si el usuario estaba en la vista de datos, regresarlo al carrito */
+    mostrarVistaCarrito();
+  } else {
+    vacio.hidden = true;
+    resumen.hidden = false;
+    items.forEach(function(item){ lista.appendChild(crearFilaCarrito(item)); });
+    document.getElementById('carritoUnidades').textContent = String(CarritoState.totalUnidades());
+    document.getElementById('carritoSubtotal').textContent = formatoPrecio(CarritoState.subtotal());
+    if(btnTusDatos) btnTusDatos.disabled = false;
+  }
+
+  actualizarContadorCarrito();
+  actualizarResumenFormulario();
+}
+
+function actualizarContadorCarrito(){
+  const total = CarritoState.totalUnidades();
+  const badge = document.getElementById('carritoBadge');
+  const btn = document.getElementById('btnAbrirCarrito');
+  if(badge){
+    badge.textContent = String(total);
+    badge.hidden = total === 0;
+  }
+  if(btn){
+    btn.setAttribute('aria-label', 'Abrir carrito, ' + total + (total === 1 ? ' producto' : ' productos'));
+  }
+}
+
+/* ---------- 11.4 Apertura / cierre del panel (accesible) ---------- */
+
+function mostrarVistaCarrito(){
+  const vc = document.getElementById('carritoVista');
+  const vd = document.getElementById('datosVista');
+  if(vc) vc.hidden = false;
+  if(vd) vd.hidden = true;
+}
+
+function mostrarVistaDatos(){
+  if(CarritoState.getItems().length === 0) return;
+  const vc = document.getElementById('carritoVista');
+  const vd = document.getElementById('datosVista');
+  if(vc) vc.hidden = true;
+  if(vd) vd.hidden = false;
+  actualizarResumenFormulario();
+  window.setTimeout(function(){
+    const primerCampo = document.getElementById('campoNombre');
+    if(primerCampo) primerCampo.focus();
+  }, 0);
+}
+
+function manejarTeclaCarrito(e){
+  if(e.key === 'Escape'){
+    cerrarCarrito();
+    return;
+  }
+  if(e.key === 'Tab'){
+    const panel = document.getElementById('carritoPanel');
+    if(!panel) return;
+    const vistaActiva = panel.querySelector('.carrito-vista:not([hidden])');
+    if(!vistaActiva) return;
+    const focosPosibles = vistaActiva.querySelectorAll('button:not([disabled]), a[href], input:not([disabled])');
+    if(!focosPosibles.length) return;
+    const primero = focosPosibles[0];
+    const ultimo = focosPosibles[focosPosibles.length - 1];
+    if(e.shiftKey && document.activeElement === primero){
+      e.preventDefault(); ultimo.focus();
+    } else if(!e.shiftKey && document.activeElement === ultimo){
+      e.preventDefault(); primero.focus();
+    }
+  }
+}
+
+function abrirCarrito(){
+  const overlay = document.getElementById('carritoOverlay');
+  const panel = document.getElementById('carritoPanel');
+  const btn = document.getElementById('btnAbrirCarrito');
+  if(!overlay || !panel) return;
+
+  mostrarVistaCarrito();
+  overlay.hidden = false;
+  panel.hidden = false;
+  document.body.classList.add('bloqueo-scroll');
+  if(btn) btn.setAttribute('aria-expanded', 'true');
+
+  document.addEventListener('keydown', manejarTeclaCarrito);
+  window.setTimeout(function(){ panel.focus(); }, 0);
+}
+
+function cerrarCarrito(){
+  const overlay = document.getElementById('carritoOverlay');
+  const panel = document.getElementById('carritoPanel');
+  const btn = document.getElementById('btnAbrirCarrito');
+  if(!overlay || !panel) return;
+
+  overlay.hidden = true;
+  panel.hidden = true;
+  document.body.classList.remove('bloqueo-scroll');
+  document.removeEventListener('keydown', manejarTeclaCarrito);
+  if(btn){
+    btn.setAttribute('aria-expanded', 'false');
+    btn.focus();
+  }
+}
+
+/* ---------- 11.5 Formulario: tipo de pedido y validaciones ---------- */
+
+function actualizarTipoPedidoUI(){
+  const domicilio = document.getElementById('tipoDomicilio');
+  const recoger = document.getElementById('tipoRecoger');
+  const esDomicilio = !!(domicilio && domicilio.checked);
+  const esRecoger = !!(recoger && recoger.checked);
+
+  const bloqueDomicilio = document.getElementById('bloqueDomicilio');
+  const bloqueRecoger = document.getElementById('bloqueRecoger');
+  const campoDireccion = document.getElementById('campoDireccion');
+  const campoBarrio = document.getElementById('campoBarrio');
+
+  if(bloqueDomicilio) bloqueDomicilio.hidden = !esDomicilio;
+  if(bloqueRecoger) bloqueRecoger.hidden = !esRecoger;
+  if(campoDireccion) campoDireccion.required = esDomicilio;
+  if(campoBarrio) campoBarrio.required = esDomicilio;
+
+  actualizarResumenFormulario();
+}
+
+/* Valida un celular colombiano (10 dígitos, inicia en 3),
+   admite espacios y el indicativo +57 opcional. */
+function validarCelular(valorCrudo){
+  let digitos = String(valorCrudo || '').replace(/\D/g, '');
+  if(digitos.length === 12 && digitos.startsWith('57')){
+    digitos = digitos.slice(2);
+  }
+  const valido = /^3\d{9}$/.test(digitos);
+  return { valido: valido, normalizado: digitos };
+}
+
+function mostrarErrorCampo(idInput, idError, mensaje){
+  const input = document.getElementById(idInput);
+  const error = document.getElementById(idError);
+  if(input) input.setAttribute('aria-invalid', 'true');
+  if(error){ error.textContent = mensaje; error.hidden = false; }
+}
+
+function limpiarErrorCampo(idInput, idError){
+  const input = document.getElementById(idInput);
+  const error = document.getElementById(idError);
+  if(input) input.removeAttribute('aria-invalid');
+  if(error){ error.textContent = ''; error.hidden = true; }
+}
+
+function validarFormularioPedido(){
+  let valido = true;
+  const datos = {};
+
+  const nombreEl = document.getElementById('campoNombre');
+  const nombre = nombreEl ? nombreEl.value.trim() : '';
+  if(nombre.length < 3 || nombre.length > 80){
+    mostrarErrorCampo('campoNombre', 'errorNombre', 'Ingresa tu nombre y apellido completo.');
+    valido = false;
+  } else {
+    limpiarErrorCampo('campoNombre', 'errorNombre');
+    datos.nombre = nombre;
+  }
+
+  const celularEl = document.getElementById('campoCelular');
+  const resultadoCelular = validarCelular(celularEl ? celularEl.value : '');
+  if(!resultadoCelular.valido){
+    mostrarErrorCampo('campoCelular', 'errorCelular', 'Ingresa un celular colombiano válido (10 dígitos, ej: 300 123 4567).');
+    valido = false;
+  } else {
+    limpiarErrorCampo('campoCelular', 'errorCelular');
+    datos.celular = resultadoCelular.normalizado;
+  }
+
+  const tipoEl = document.querySelector('input[name="tipoPedido"]:checked');
+  const errorTipo = document.getElementById('errorTipoPedido');
+  if(!tipoEl){
+    if(errorTipo){ errorTipo.textContent = 'Selecciona domicilio o recoger en el restaurante.'; errorTipo.hidden = false; }
+    valido = false;
+  } else {
+    if(errorTipo) errorTipo.hidden = true;
+    datos.tipoPedido = tipoEl.value;
+  }
+
+  if(tipoEl && tipoEl.value === 'domicilio'){
+    const direccionEl = document.getElementById('campoDireccion');
+    const direccion = direccionEl ? direccionEl.value.trim() : '';
+    if(direccion.length < 5){
+      mostrarErrorCampo('campoDireccion', 'errorDireccion', 'Ingresa la dirección completa.');
+      valido = false;
+    } else {
+      limpiarErrorCampo('campoDireccion', 'errorDireccion');
+      datos.direccion = direccion;
+    }
+
+    const barrioEl = document.getElementById('campoBarrio');
+    const barrio = barrioEl ? barrioEl.value.trim() : '';
+    if(!barrio){
+      mostrarErrorCampo('campoBarrio', 'errorBarrio', 'Ingresa el barrio.');
+      valido = false;
+    } else {
+      limpiarErrorCampo('campoBarrio', 'errorBarrio');
+      datos.barrio = barrio;
+    }
+
+    datos.casa = (document.getElementById('campoCasa') || {}).value ? document.getElementById('campoCasa').value.trim() : '';
+    datos.apartamento = (document.getElementById('campoApartamento') || {}).value ? document.getElementById('campoApartamento').value.trim() : '';
+    datos.torre = (document.getElementById('campoTorre') || {}).value ? document.getElementById('campoTorre').value.trim() : '';
+    datos.referencia = (document.getElementById('campoReferencia') || {}).value ? document.getElementById('campoReferencia').value.trim() : '';
+  }
+
+  const pagoEl = document.querySelector('input[name="formaPago"]:checked');
+  const errorPago = document.getElementById('errorFormaPago');
+  if(!pagoEl){
+    if(errorPago){ errorPago.textContent = 'Selecciona una forma de pago.'; errorPago.hidden = false; }
+    valido = false;
+  } else {
+    if(errorPago) errorPago.hidden = true;
+    datos.formaPago = pagoEl.value;
+  }
+
+  const items = CarritoState.getItems();
+  const itemsValidos = items.length > 0 && items.every(function(it){ return precioValido(it.precio) && it.cantidad >= 1; });
+  if(!itemsValidos) valido = false;
+
+  return { valido: valido, datos: datos, items: items };
+}
+
+/* Resumen en vivo dentro del formulario (subtotal, envío, total) */
+function actualizarResumenFormulario(){
+  const contenedor = document.getElementById('resumenProductos');
+  if(!contenedor) return;
+
+  const items = CarritoState.getItems();
+  const subtotal = CarritoState.subtotal();
+
+  contenedor.innerHTML = '';
+  items.forEach(function(it){
+    const fila = document.createElement('div');
+    fila.className = 'resumen-producto-fila';
+    const izq = document.createElement('span');
+    izq.textContent = it.cantidad + ' × ' + it.nombre;
+    const der = document.createElement('span');
+    der.textContent = formatoPrecio(it.precio * it.cantidad);
+    fila.append(izq, der);
+    contenedor.appendChild(fila);
+  });
+
+  document.getElementById('resumenSubtotal').textContent = formatoPrecio(subtotal);
+  document.getElementById('resumenTotal').textContent = formatoPrecio(subtotal);
+
+  const tipoSeleccionado = document.querySelector('input[name="tipoPedido"]:checked');
+  const envioFila = document.getElementById('resumenEnvioFila');
+  const envioSpan = document.getElementById('resumenEnvio');
+  const avisoEnvio = document.getElementById('resumenAvisoEnvio');
+
+  if(tipoSeleccionado && tipoSeleccionado.value === 'domicilio'){
+    envioSpan.textContent = 'Por confirmar';
+    if(envioFila) envioFila.dataset.estado = 'pendiente';
+    if(avisoEnvio) avisoEnvio.hidden = false;
+  } else if(tipoSeleccionado && tipoSeleccionado.value === 'recoger'){
+    envioSpan.textContent = 'Sin costo de envío';
+    if(envioFila) envioFila.dataset.estado = '';
+    if(avisoEnvio) avisoEnvio.hidden = true;
+  } else {
+    envioSpan.textContent = '—';
+    if(envioFila) envioFila.dataset.estado = '';
+    if(avisoEnvio) avisoEnvio.hidden = true;
+  }
+}
+
+/* ---------- 11.6 Mensaje de WhatsApp ---------- */
+
+function construirMensajeWhatsApp(datos, items){
+  const subtotalGeneral = items.reduce(function(sum, it){ return sum + (it.precio * it.cantidad); }, 0);
+  const esDomicilio = datos.tipoPedido === 'domicilio';
+
+  let msg = '🍔 *NUEVO PEDIDO — WARIO BROSS*\n\n';
+
+  msg += '👤 *DATOS DEL CLIENTE*\n';
+  msg += 'Nombre: ' + datos.nombre + '\n';
+  msg += 'Celular: ' + datos.celular + '\n\n';
+
+  msg += '📦 *TIPO DE PEDIDO*\n';
+  msg += 'Modalidad: ' + (esDomicilio ? 'Domicilio' : 'Recoger en el restaurante') + '\n\n';
+
+  if(esDomicilio){
+    msg += '📍 *DATOS DE ENTREGA*\n';
+    msg += 'Dirección: ' + datos.direccion + '\n';
+    msg += 'Casa: ' + (datos.casa || 'No aplica') + '\n';
+    msg += 'Apartamento: ' + (datos.apartamento || 'No aplica') + '\n';
+    msg += 'Torre: ' + (datos.torre || 'No aplica') + '\n';
+    msg += 'Barrio: ' + datos.barrio + '\n';
+    msg += 'Referencia adicional: ' + (datos.referencia || 'No indicada') + '\n\n';
+  } else {
+    msg += '📍 *RECOGER EN EL RESTAURANTE*\n';
+    msg += 'Cra. 85C # 43-69, El Caney, Cali, Colombia\n\n';
+  }
+
+  msg += '💳 *FORMA DE PAGO*\n';
+  msg += datos.formaPago + '\n\n';
+
+  msg += '🛒 *DETALLE DEL PEDIDO*\n';
+  items.forEach(function(it){
+    msg += it.cantidad + ' x ' + it.nombre + '\n';
+    msg += 'Precio unitario: ' + formatoPrecio(it.precio) + '\n';
+    msg += 'Subtotal: ' + formatoPrecio(it.precio * it.cantidad) + '\n\n';
+  });
+
+  msg += '💰 *RESUMEN DE VALORES*\n';
+  msg += 'Subtotal de productos: ' + formatoPrecio(subtotalGeneral) + '\n';
+  msg += 'Envío: ' + (esDomicilio ? 'Por confirmar' : 'Sin costo de envío') + '\n';
+  msg += 'Total de productos: ' + formatoPrecio(subtotalGeneral) + '\n\n';
+
+  if(esDomicilio){
+    msg += 'ℹ️ Los gastos de envío se informarán una vez se confirme el pedido.\n\n';
+  }
+
+  msg += '✅ Pedido preparado desde la página web de Wario Bross.';
+
+  return msg;
+}
+
+/* ---------- 11.7 Envío del pedido (con protección anti doble clic) ---------- */
+
+let enviandoPedido = false;
+
+function manejarEnvioPedido(e){
+  e.preventDefault();
+  if(enviandoPedido) return;
+
+  const resultado = validarFormularioPedido();
+  if(!resultado.valido){
+    const primerInvalido = document.querySelector('#formPedido [aria-invalid="true"]');
+    if(primerInvalido){ primerInvalido.focus(); }
+    return;
+  }
+
+  enviandoPedido = true;
+  const btn = document.getElementById('btnEnviarPedido');
+  if(btn){ btn.disabled = true; btn.textContent = 'Abriendo WhatsApp…'; }
+
+  const mensaje = construirMensajeWhatsApp(resultado.datos, resultado.items);
+  const url = 'https://wa.me/' + CONFIG.whatsappNumber + '?text=' + encodeURIComponent(mensaje);
+
+  window.open(url, '_blank', 'noopener');
+
+  const aviso = document.getElementById('avisoWhatsapp');
+  if(aviso){
+    aviso.textContent = 'Se abrió WhatsApp con tu pedido preparado. Revisa el mensaje y pulsa Enviar para compartirlo con el restaurante.';
+    aviso.hidden = false;
+  }
+
+  window.setTimeout(function(){
+    enviandoPedido = false;
+    if(btn){ btn.disabled = false; btn.textContent = 'Enviar pedido'; }
+  }, 2500);
+}
+
+/* ---------- 11.8 Inicialización (protegida contra doble init) ---------- */
+
+(function initCarrito(){
+  if(window.__warioCartInit) return;
+  window.__warioCartInit = true;
+
+  const btnAbrir = document.getElementById('btnAbrirCarrito');
+  const btnCerrarCarrito = document.getElementById('carritoCerrar');
+  const btnCerrarDatos = document.getElementById('datosCerrar');
+  const overlay = document.getElementById('carritoOverlay');
+  const btnVaciar = document.getElementById('carritoVaciar');
+  const btnTusDatos = document.getElementById('carritoTusDatos');
+  const btnVolver = document.getElementById('datosVolver');
+  const linkVerMenu = document.getElementById('carritoVerMenu');
+  const form = document.getElementById('formPedido');
+
+  if(btnAbrir) btnAbrir.addEventListener('click', abrirCarrito);
+  if(btnCerrarCarrito) btnCerrarCarrito.addEventListener('click', cerrarCarrito);
+  if(btnCerrarDatos) btnCerrarDatos.addEventListener('click', cerrarCarrito);
+  if(overlay) overlay.addEventListener('click', cerrarCarrito);
+  if(linkVerMenu) linkVerMenu.addEventListener('click', cerrarCarrito);
+
+  if(btnVaciar){
+    btnVaciar.addEventListener('click', function(){
+      if(CarritoState.getItems().length === 0) return;
+      if(window.confirm('¿Vaciar todo el carrito?')){ CarritoState.vaciar(); }
+    });
+  }
+
+  if(btnTusDatos) btnTusDatos.addEventListener('click', mostrarVistaDatos);
+  if(btnVolver) btnVolver.addEventListener('click', mostrarVistaCarrito);
+
+  document.querySelectorAll('input[name="tipoPedido"]').forEach(function(radio){
+    radio.addEventListener('change', actualizarTipoPedidoUI);
+  });
+
+  if(form) form.addEventListener('submit', manejarEnvioPedido);
+
+  CarritoState.onChange(renderizarCarrito);
+  renderizarCarrito();
 })();
 </script>
 
