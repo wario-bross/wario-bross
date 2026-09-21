@@ -3059,7 +3059,7 @@ function crearFilaCarrito(item){
     img.alt = '';
     imgWrap.appendChild(img);
   } else {
-    imgWrap.textContent = '🍔';
+    imgWrap.textContent = '\u{1F354}';
   }
 
   const info = document.createElement('div');
@@ -3405,17 +3405,17 @@ function construirMensajeWhatsApp(datos, items){
   const subtotalGeneral = items.reduce(function(sum, it){ return sum + (it.precio * it.cantidad); }, 0);
   const esDomicilio = datos.tipoPedido === 'domicilio';
 
-  let msg = '🍔 *NUEVO PEDIDO — WARIO BROSS*\n\n';
+  let msg = '\u{1F354} *NUEVO PEDIDO \u2014 WARIO BROSS*\n\n';
 
-  msg += '👤 *DATOS DEL CLIENTE*\n';
+  msg += '\u{1F464} *DATOS DEL CLIENTE*\n';
   msg += 'Nombre: ' + datos.nombre + '\n';
   msg += 'Celular: ' + datos.celular + '\n\n';
 
-  msg += '📦 *TIPO DE PEDIDO*\n';
+  msg += '\u{1F4E6} *TIPO DE PEDIDO*\n';
   msg += 'Modalidad: ' + (esDomicilio ? 'Domicilio' : 'Recoger en el restaurante') + '\n\n';
 
   if(esDomicilio){
-    msg += '📍 *DATOS DE ENTREGA*\n';
+    msg += '\u{1F4CD} *DATOS DE ENTREGA*\n';
     msg += 'Dirección: ' + datos.direccion + '\n';
     msg += 'Casa: ' + (datos.casa || 'No aplica') + '\n';
     msg += 'Apartamento: ' + (datos.apartamento || 'No aplica') + '\n';
@@ -3423,30 +3423,30 @@ function construirMensajeWhatsApp(datos, items){
     msg += 'Barrio: ' + datos.barrio + '\n';
     msg += 'Referencia adicional: ' + (datos.referencia || 'No indicada') + '\n\n';
   } else {
-    msg += '📍 *RECOGER EN EL RESTAURANTE*\n';
+    msg += '\u{1F4CD} *RECOGER EN EL RESTAURANTE*\n';
     msg += 'Cra. 85C # 43-69, El Caney, Cali, Colombia\n\n';
   }
 
-  msg += '💳 *FORMA DE PAGO*\n';
+  msg += '\u{1F4B3} *FORMA DE PAGO*\n';
   msg += datos.formaPago + '\n\n';
 
-  msg += '🛒 *DETALLE DEL PEDIDO*\n';
+  msg += '\u{1F6D2} *DETALLE DEL PEDIDO*\n';
   items.forEach(function(it){
     msg += it.cantidad + ' x ' + it.nombre + '\n';
     msg += 'Precio unitario: ' + formatoPrecio(it.precio) + '\n';
     msg += 'Subtotal: ' + formatoPrecio(it.precio * it.cantidad) + '\n\n';
   });
 
-  msg += '💰 *RESUMEN DE VALORES*\n';
+  msg += '\u{1F4B0} *RESUMEN DE VALORES*\n';
   msg += 'Subtotal de productos: ' + formatoPrecio(subtotalGeneral) + '\n';
   msg += 'Envío: ' + (esDomicilio ? 'Por confirmar' : 'Sin costo de envío') + '\n';
   msg += 'Total de productos: ' + formatoPrecio(subtotalGeneral) + '\n\n';
 
   if(esDomicilio){
-    msg += 'ℹ️ Los gastos de envío se informarán una vez se confirme el pedido.\n\n';
+    msg += '\u2139\uFE0F Los gastos de envío se informarán una vez se confirme el pedido.\n\n';
   }
 
-  msg += '✅ Pedido preparado desde la página web de Wario Bross.';
+  msg += '\u2705 Pedido preparado desde la página web de Wario Bross.';
 
   return msg;
 }
