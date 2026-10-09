@@ -962,8 +962,14 @@ button:focus-visible{
 .header-toggle.activo span:nth-child(2){ opacity:0; }
 .header-toggle.activo span:nth-child(3){ transform: translateY(-7px) rotate(-45deg); }
 
+/* Escritorio con 6 enlaces: compactar en anchos medianos para que no desborde */
+@media (min-width:1041px) and (max-width:1180px){
+  .header-nav{ gap:16px; }
+  .header-nav a{ font-size:14.5px; }
+}
+
 /* Mobile: nav se convierte en panel desplegable, CTA queda siempre visible */
-@media (max-width: 880px){
+@media (max-width: 1040px){
   .header-nav{
     position:fixed; top: var(--header-alto); left:0; right:0;
     background: var(--color-fondo);
@@ -972,14 +978,14 @@ button:focus-visible{
     max-height:0; overflow:hidden;
     transition: max-height .25s ease;
   }
-  .header-nav.abierto{ max-height:320px; }
+  .header-nav.abierto{ max-height:400px; }
   .header-nav a{
     padding:16px 20px; border-bottom:1px solid var(--color-borde);
   }
   .header-nav a::after{ display:none; }
   .header-toggle{ display:flex; }
 }
-@media (min-width: 881px){
+@media (min-width: 1041px){
   .header-toggle{ display:none; }
 }
 
@@ -995,6 +1001,15 @@ button:focus-visible{
 .hero-media{
   position:absolute; inset:0; z-index:0;
 }
+@keyframes zoomHero{
+  from{ transform:scale(1) translate3d(0,0,0); }
+  to{   transform:scale(1.10) translate3d(-1.2%,-1%,0); }
+}
+.hero-media img{
+  animation: zoomHero 24s ease-in-out infinite alternate;
+  transform-origin:center 40%; will-change:transform;
+}
+@media (prefers-reduced-motion: reduce){ .hero-media img{ animation:none; will-change:auto; } }
 .hero-media img{
   width:100%; height:100%; object-fit:cover; object-position:center 30%;
 }
@@ -1118,11 +1133,27 @@ button:focus-visible{
 .destacados-intro p:not(.eyebrow){
   margin-top:12px; font-size:15.5px; line-height:1.6; color:var(--color-texto-sutil);
 }
-.destacados-grid{
-  margin-top:30px; display:grid; grid-template-columns:1fr; gap:18px;
+.destacados-viewport{
+  margin-top:30px; width:100%;
+  overflow-x:auto; overflow-y:hidden;
+  scrollbar-width:none; -webkit-overflow-scrolling:touch;
+  cursor:grab; user-select:none; -webkit-user-select:none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 96%, transparent 100%);
 }
-@media (min-width:720px){
-  .destacados-grid{ grid-template-columns:repeat(3,1fr); gap:20px; }
+.destacados-viewport::-webkit-scrollbar{ display:none; }
+.destacados-viewport.arrastrando{ cursor:grabbing; }
+.destacados-viewport img{ -webkit-user-drag:none; pointer-events:none; }
+.destacados-track{
+  display:flex; gap:20px; width:max-content; padding:4px 20px 16px;
+}
+/* Mismo ancho de tarjeta que el carrusel de reseñas */
+.destacados-track > li{ flex:0 0 auto; width:min(84vw, 320px); }
+@media (min-width:720px){ .destacados-track > li{ width:300px; } }
+@media (min-width:1080px){ .destacados-track > li{ width:340px; } }
+@media (prefers-reduced-motion: reduce){
+  .destacados-viewport{ scroll-snap-type:x proximity; }
+  .destacados-track > li{ scroll-snap-align:start; }
 }
 .destacado-card{
   display:flex; flex-direction:column; width:100%; height:100%; text-align:left;
@@ -1993,6 +2024,7 @@ button:focus-visible{
 
     <nav class="header-nav" id="headerNav" aria-label="Navegación principal">
       <a href="#inicio" data-nav-link>Inicio</a>
+      <a href="#destacados" data-nav-link>Productos destacados</a>
       <a href="#quienes-somos" data-nav-link>Quiénes somos</a>
       <a href="#menu" data-nav-link>Menú</a>
       <a href="#resenas" data-nav-link>Reseñas</a>
@@ -2057,7 +2089,9 @@ button:focus-visible{
         <h2 id="destacadosTitulo">Productos destacados</h2>
         <p>Tres opciones del menú para que empieces a antojarte.</p>
       </div>
-      <ul class="destacados-grid" id="destacadosGrid"></ul>
+    </div>
+    <div class="destacados-viewport" id="destacadosViewport" tabindex="-1">
+      <ul class="destacados-track" id="destacadosTrack"></ul>
     </div>
   </section>
 
@@ -2344,7 +2378,7 @@ button:focus-visible{
       <nav aria-label="Navegación del pie de página">
         <h3 class="footer-heading">Explora</h3>
         <ul class="footer-links">
-          <li><a href="#inicio">Inicio</a></li><li><a href="#quienes-somos">Quiénes somos</a></li><li><a href="#menu">Menú</a></li><li><a href="#resenas">Reseñas</a></li><li><a href="#ubicacion">Contáctanos</a></li>
+          <li><a href="#inicio">Inicio</a></li><li><a href="#destacados">Productos destacados</a></li><li><a href="#quienes-somos">Quiénes somos</a></li><li><a href="#menu">Menú</a></li><li><a href="#resenas">Reseñas</a></li><li><a href="#ubicacion">Contáctanos</a></li>
         </ul>
       </nav>
 
@@ -2702,59 +2736,197 @@ function buscarProductoPorNombre(nombre){
   return null;
 }
 
-function renderizarDestacados(){
-  const grid = document.getElementById('destacadosGrid');
-  if(!grid) return;
-  DESTACADOS.forEach(function(nombre){
-    const hallado = buscarProductoPorNombre(nombre);
-    if(!hallado) return; /* nombre no encontrado: se omite en vez de mostrar datos falsos */
-    const cat = hallado.cat, prod = hallado.prod;
+function crearTarjetaDestacado(hallado, esClon){
+  const cat = hallado.cat, prod = hallado.prod;
+  const li = document.createElement('li');
+  if(esClon){ li.setAttribute('aria-hidden', 'true'); li.setAttribute('data-destacado-clon', ''); }
 
-    const li = document.createElement('li');
-    const boton = document.createElement('button');
-    boton.type = 'button';
-    boton.className = 'destacado-card';
-    boton.setAttribute('aria-label', 'Ver detalles de ' + prod.nombre + ', ' + formatoCOP(prod.precio));
+  const boton = document.createElement('button');
+  boton.type = 'button';
+  boton.className = 'destacado-card';
+  if(esClon) boton.tabIndex = -1;
+  boton.setAttribute('aria-label', 'Ver detalles de ' + prod.nombre + ', ' + formatoCOP(prod.precio));
 
-    const media = document.createElement('span');
-    media.className = 'destacado-media';
-    if(prod.imagen){
-      const img = document.createElement('img');
-      img.src = prod.imagen; img.alt = prod.nombre; img.loading = 'lazy';
-      img.width = 400; img.height = 300;
-      media.appendChild(img);
-    } else {
-      media.textContent = cat.icono;
-    }
-    boton.appendChild(media);
+  const media = document.createElement('span');
+  media.className = 'destacado-media';
+  if(prod.imagen){
+    const img = document.createElement('img');
+    img.src = prod.imagen; img.alt = esClon ? '' : prod.nombre; img.loading = 'lazy';
+    img.width = 400; img.height = 300; img.draggable = false;
+    /* Si la foto aún no está subida al repositorio, mostrar el ícono en vez de texto roto */
+    img.addEventListener('error', function(){ media.textContent = cat.icono; });
+    media.appendChild(img);
+  } else {
+    media.textContent = cat.icono;
+  }
+  boton.appendChild(media);
 
-    const info = document.createElement('span');
-    info.className = 'destacado-info';
-    if(prod.personas){
-      const badge = document.createElement('span');
-      badge.className = 'producto-badge';
-      badge.textContent = 'Para ' + prod.personas + ' personas';
-      info.appendChild(badge);
-    }
-    const n = document.createElement('span');
-    n.className = 'destacado-nombre'; n.textContent = prod.nombre;
-    info.appendChild(n);
-    if(prod.desc){
-      const d = document.createElement('span');
-      d.className = 'destacado-desc'; d.textContent = prod.desc;
-      info.appendChild(d);
-    }
-    const pr = document.createElement('span');
-    pr.className = 'destacado-precio'; pr.textContent = formatoCOP(prod.precio);
-    info.appendChild(pr);
-    boton.appendChild(info);
+  const info = document.createElement('span');
+  info.className = 'destacado-info';
+  if(prod.personas){
+    const badge = document.createElement('span');
+    badge.className = 'producto-badge';
+    badge.textContent = 'Para ' + prod.personas + ' personas';
+    info.appendChild(badge);
+  }
+  const n = document.createElement('span');
+  n.className = 'destacado-nombre'; n.textContent = prod.nombre;
+  info.appendChild(n);
+  if(prod.desc){
+    const d = document.createElement('span');
+    d.className = 'destacado-desc'; d.textContent = prod.desc;
+    info.appendChild(d);
+  }
+  const pr = document.createElement('span');
+  pr.className = 'destacado-precio'; pr.textContent = formatoCOP(prod.precio);
+  info.appendChild(pr);
+  boton.appendChild(info);
 
-    boton.addEventListener('click', function(){
-      abrirDetalleProducto(cat, prod, boton, hallado.id);
-    });
-    li.appendChild(boton);
-    grid.appendChild(li);
+  boton.addEventListener('click', function(){
+    abrirDetalleProducto(cat, prod, boton, hallado.id);
   });
+  li.appendChild(boton);
+  return li;
+}
+
+/* Carrusel continuo (derecha → izquierda) con arrastre manual.
+   - Usa scroll nativo: el dedo (o el mouse arrastrando) lo mueve libremente.
+   - El avance automático se pausa al tocar/arrastrar/pasar el mouse/enfocar
+     y se reanuda ~1,5 s después de la última interacción.
+   - Velocidad = la misma (px/s) que el carrusel de reseñas, medida en vivo.
+   - 3 bloques idénticos: al llegar a un extremo se salta un bloque (invisible). */
+function initCarruselDestacados(viewport, track, halladas){
+  const PAUSA_MS = 1500;
+  let blockW = 1, velocidad = 40, pos = 0, ultimoSet = 0, ultimoFrame = 0;
+  let ultimaInteraccion = 0, arrastrando = false, hover = false, enfoque = false, visible = true, eraActivo = false;
+  let inicioX = 0, inicioScroll = 0, movido = false;
+
+  function velocidadResenas(){
+    const t = document.getElementById('resenasTrack');
+    if(!t) return 40;
+    const raw = getComputedStyle(t).animationDuration || '';
+    const seg = /ms$/.test(raw) ? parseFloat(raw) / 1000 : parseFloat(raw);
+    if(!seg || seg < 1) return 40;
+    return (t.offsetWidth / 2) / seg;
+  }
+
+  function armar(){
+    track.innerHTML = '';
+    halladas.forEach(function(h){ track.appendChild(crearTarjetaDestacado(h, false)); });
+    const li0 = track.firstElementChild;
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 20;
+    const setW = halladas.length * (li0.offsetWidth + gap);
+    const copias = Math.max(1, Math.ceil(viewport.clientWidth / setW));
+    blockW = setW * copias;
+
+    track.innerHTML = '';
+    for(let bloque = 0; bloque < 3; bloque++){
+      for(let c = 0; c < copias; c++){
+        halladas.forEach(function(h){
+          /* El único juego "real" (accesible) es el del bloque central */
+          track.appendChild(crearTarjetaDestacado(h, !(bloque === 1 && c === 0)));
+        });
+      }
+    }
+    velocidad = velocidadResenas();
+    viewport.scrollLeft = blockW;
+    pos = ultimoSet = viewport.scrollLeft;
+  }
+
+  function ahora(){ return performance.now(); }
+
+  let frames = 0;
+  function tick(t){
+    const dt = Math.min(0.05, (t - ultimoFrame) / 1000);
+    ultimoFrame = t;
+    /* Las reseñas se dibujan después de este bloque: re-medir su velocidad
+       periódicamente (≈ 1 vez por segundo) para igualarla siempre. */
+    if(frames++ % 60 === 0) velocidad = velocidadResenas();
+    const activo = visible && !arrastrando && !hover && !enfoque && !document.hidden &&
+                   !document.body.classList.contains('bloqueo-scroll') &&
+                   (ahora() - ultimaInteraccion > PAUSA_MS);
+    if(activo){
+      if(!eraActivo) pos = viewport.scrollLeft;
+      pos += velocidad * dt;
+      if(pos >= 2 * blockW) pos -= blockW;
+      viewport.scrollLeft = pos;
+      ultimoSet = viewport.scrollLeft;
+    }
+    eraActivo = activo;
+    requestAnimationFrame(tick);
+  }
+
+  viewport.addEventListener('scroll', function(){
+    const sl = viewport.scrollLeft;
+    if(Math.abs(sl - ultimoSet) > 2) ultimaInteraccion = ahora(); /* movimiento hecho por el usuario */
+    if(sl >= 2 * blockW){ viewport.scrollLeft = sl - blockW; ultimoSet = viewport.scrollLeft; }
+    else if(sl < 0.2 * blockW){ viewport.scrollLeft = sl + blockW; ultimoSet = viewport.scrollLeft; }
+  }, { passive: true });
+
+  ['touchstart', 'touchend', 'wheel', 'keydown'].forEach(function(ev){
+    viewport.addEventListener(ev, function(){ ultimaInteraccion = ahora(); }, { passive: true });
+  });
+
+  /* Arrastre con mouse (en táctil el scroll nativo ya funciona con el dedo) */
+  viewport.addEventListener('pointerdown', function(e){
+    ultimaInteraccion = ahora();
+    if(e.pointerType !== 'mouse') return;
+    arrastrando = true; movido = false;
+    inicioX = e.clientX; inicioScroll = viewport.scrollLeft;
+    viewport.classList.add('arrastrando');
+  });
+  window.addEventListener('pointermove', function(e){
+    if(!arrastrando) return;
+    const dx = e.clientX - inicioX;
+    if(Math.abs(dx) > 5) movido = true;
+    viewport.scrollLeft = inicioScroll - dx;
+    ultimaInteraccion = ahora();
+  });
+  window.addEventListener('pointerup', function(){
+    if(!arrastrando) return;
+    arrastrando = false;
+    viewport.classList.remove('arrastrando');
+    ultimaInteraccion = ahora();
+  });
+  /* Si fue un arrastre, no abrir el producto al soltar */
+  viewport.addEventListener('click', function(e){
+    if(movido){ e.stopPropagation(); e.preventDefault(); movido = false; }
+  }, true);
+
+  viewport.addEventListener('pointerenter', function(e){ if(e.pointerType === 'mouse') hover = true; });
+  viewport.addEventListener('pointerleave', function(e){ if(e.pointerType === 'mouse') hover = false; });
+  viewport.addEventListener('focusin', function(){ enfoque = true; });
+  viewport.addEventListener('focusout', function(){ enfoque = false; ultimaInteraccion = ahora(); });
+
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(en){ visible = en[0].isIntersecting; }).observe(viewport);
+  }
+
+  let tRedim = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(tRedim);
+    tRedim = setTimeout(armar, 200);
+  });
+
+  armar();
+  requestAnimationFrame(function(t){ ultimoFrame = t; requestAnimationFrame(tick); });
+}
+
+function renderizarDestacados(){
+  const viewport = document.getElementById('destacadosViewport');
+  const track = document.getElementById('destacadosTrack');
+  if(!viewport || !track) return;
+  /* nombre no encontrado: se omite en vez de mostrar datos falsos */
+  const halladas = DESTACADOS.map(buscarProductoPorNombre).filter(Boolean);
+  if(!halladas.length) return;
+
+  const reducido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reducido){
+    /* Sin movimiento automático: carrusel manual deslizable, un solo juego */
+    halladas.forEach(function(h){ track.appendChild(crearTarjetaDestacado(h, false)); });
+    return;
+  }
+  initCarruselDestacados(viewport, track, halladas);
 }
 renderizarDestacados();
 
