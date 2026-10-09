@@ -8,7 +8,7 @@
 ============================================================= -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wario Bross | Hamburguesas, Comidas rápidas y Asados en Cali</title>
+<title>Wario Bross | Hamburguesas, Hot Dogs y Asados con sabor a Cali</title>
 <meta name="description" content="Hamburguesas artesanales, hot dogs, asados y salchipapas en Cali. Carne Angus importada, sabor a Cali. Pide en línea en Wario Bross.">
 <meta name="robots" content="index, follow">
 <meta name="google-site-verification" content="61M8MFPnjF5rCzs7KrGMbSBRfSwU-rDoiAm1uW-LAH8" />
@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="img/brand/logo-wario-bross-512.png">
 
 <!-- Open Graph — imagen OG 1200x630 propia pendiente (Fase 8). Placeholder: logo -->
-<meta property="og:title" content="Wario Bross | Hamburguesas, Comidas rápidas y Asados en Cali">
+<meta property="og:title" content="Wario Bross | Hamburguesas, Hot Dogs y Asados con sabor a Cali">
 <meta property="og:description" content="Hamburguesas artesanales, hot dogs, asados y salchipapas en Cali. Carne Angus importada, sabor a Cali. Pide en línea.">
 <meta property="og:image" content="https://wario-bross.vercel.app/img/brand/logo-wario-bross-512.png">
 <meta property="og:url" content="https://wario-bross.vercel.app/">
@@ -141,13 +141,23 @@
             },
             "description": "2 hamburguesas con carne de res tradicional, papas a la francesa, acompañadas con salsa caleña.",
             "image": "https://wario-bross.vercel.app/img/products/2x1-wario-burger.webp"
+          },
+          {
+            "@type": "MenuItem",
+            "name": "2x1 Big Angus Burger",
+            "offers": {
+              "@type": "Offer",
+              "price": 39400,
+              "priceCurrency": "COP"
+            },
+            "description": "2 Hamburguesas BIG Burger, con carne 100% Black Angus de 140 grs, importada, con papas a la francesa y nuestra salsa Caleña.",
+            "image": "https://wario-bross.vercel.app/img/products/2x1-big-angus-burger.webp"
           }
         ]
       },
       {
         "@type": "MenuSection",
         "name": "PREMIUM BURGERS",
-        "description": "Generación Crystal",
         "hasMenuItem": [
           {
             "@type": "MenuItem",
@@ -165,7 +175,7 @@
             "name": "Generación Milenials",
             "offers": {
               "@type": "Offer",
-              "price": 26900,
+              "price": 25900,
               "priceCurrency": "COP"
             },
             "description": "Carne angus 140g, pan artesanal, quesillo, costilla carnuda, pepinillos dulces, cebolla caramelizada, salsa de maracuyá, lechuga fresca, papas a la francesa y salsa caleña.",
@@ -176,7 +186,7 @@
             "name": "Generación X",
             "offers": {
               "@type": "Offer",
-              "price": 26900,
+              "price": 25900,
               "priceCurrency": "COP"
             },
             "description": "Carne angus 140g, pan artesanal, doble queso mozarella, tocino ahumado pork, cebolla encurtida en salsa de arrechón, lechuga fresca, papas a la francesa y salsa con sabor a Cali.",
@@ -198,7 +208,6 @@
       {
         "@type": "MenuSection",
         "name": "CLASIC BURGERS",
-        "description": "Wario Golden",
         "hasMenuItem": [
           {
             "@type": "MenuItem",
@@ -216,7 +225,7 @@
             "name": "Triple Mela",
             "offers": {
               "@type": "Offer",
-              "price": 27900,
+              "price": 25900,
               "priceCurrency": "COP"
             },
             "description": "Pan artesanal de orégano, 140g de res, costilla, tocino ahumado, maduritos, queso cheddar, cebolla crispy, lechuga crespa, papas a la francesa y salsa caleña.",
@@ -377,7 +386,7 @@
             "name": "Salchi Personal",
             "offers": {
               "@type": "Offer",
-              "price": 14000,
+              "price": 15000,
               "priceCurrency": "COP"
             },
             "description": "Personal, con ripio de papa, queso mozarella rayado, salchicha, papas fritas y salsa caleña.",
@@ -405,7 +414,7 @@
             "name": "Picada para 2 Personas",
             "offers": {
               "@type": "Offer",
-              "price": 40000,
+              "price": 45000,
               "priceCurrency": "COP"
             },
             "description": "Costilla, chorizo, pollo, res, cerdo, papas a la francesa y ensalada mixta.",
@@ -1094,6 +1103,46 @@ button:focus-visible{
   .hero-trust{ gap:6px; }
   .hero-trust li{ font-size:16px; padding:6px 10px; }
 }
+
+/* ============================================================
+   5b) PRODUCTOS DESTACADOS
+   Tarjetas generadas desde el array MENU (misma fuente de verdad
+   de precios). La lista de destacados se define en DESTACADOS.
+============================================================= */
+.destacados{ background:var(--color-superficie-2); padding:56px 0 60px; }
+.destacados-intro{ max-width:620px; margin:0 auto; text-align:center; }
+.destacados-intro h2{
+  font-family:var(--fuente-seccion); font-weight:800;
+  font-size:clamp(30px,6vw,44px); color:var(--color-marca-oscuro); letter-spacing:.5px; line-height:1.05;
+}
+.destacados-intro p:not(.eyebrow){
+  margin-top:12px; font-size:15.5px; line-height:1.6; color:var(--color-texto-sutil);
+}
+.destacados-grid{
+  margin-top:30px; display:grid; grid-template-columns:1fr; gap:18px;
+}
+@media (min-width:720px){
+  .destacados-grid{ grid-template-columns:repeat(3,1fr); gap:20px; }
+}
+.destacado-card{
+  display:flex; flex-direction:column; width:100%; height:100%; text-align:left;
+  background:var(--color-superficie); border:1.5px solid var(--color-borde);
+  border-radius:var(--radio); overflow:hidden;
+  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.destacado-card:hover{ transform:translateY(-3px); box-shadow:var(--sombra); border-color:var(--color-teal); }
+.destacado-media{
+  width:100%; aspect-ratio:4/3; background:var(--color-superficie-2);
+  display:flex; align-items:center; justify-content:center; font-size:56px; overflow:hidden;
+}
+.destacado-media img{ width:100%; height:100%; object-fit:cover; }
+.destacado-info{ display:flex; flex-direction:column; gap:6px; padding:16px 18px 18px; flex:1; }
+.destacado-nombre{ font-family:var(--fuente-seccion); font-weight:800; font-size:19px; color:var(--color-marca-oscuro); line-height:1.2; }
+.destacado-desc{
+  font-family:var(--fuente-detalle); font-size:14px; line-height:1.4; color:var(--color-texto-sutil);
+  display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+}
+.destacado-precio{ margin-top:auto; padding-top:6px; font-family:var(--fuente-detalle); font-weight:700; font-size:20px; color:#000; }
 
 /* ============================================================
    6) QUIÉNES SOMOS
@@ -1928,16 +1977,6 @@ button:focus-visible{
 .aviso-whatsapp[hidden]{ display: none; }
 
 </style>
-     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18474665885">
-</script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'AW-18474665885');
-</script>
 </head>
 <body>
 
@@ -1985,11 +2024,11 @@ button:focus-visible{
     <div class="hero-media">
       <img
         src="img/hero/hero-wario-bross.webp"
-        alt="Combo Parejas de Wario Bross: hamburguesas, papas a la francesa y limonadas"
+        alt="Grupo de amigos disfrutando hamburguesas, papas y bebidas de Wario Bross en la terraza del restaurante"
         loading="eager" fetchpriority="high">
     </div>
     <div class="hero-content">
-      <h1 class="hero-semantic-title">Wario Bross: hamburguesas, hot dogs y asados en Cali</h1>
+      <h1 class="hero-semantic-title">Wario Bross: hamburguesas, hot dogs y asados con sabor a Cali</h1>
       <div class="hero-subtitle-backdrop">
         <p class="hero-subtitle">
           Hamburguesas que suben de nivel con carne 100% Angus o res tradicional, hot dogs, salchipapas y asados. Explora el menú y pide en línea en minutos.
@@ -2004,6 +2043,21 @@ button:focus-visible{
       <ul class="hero-trust">
         <li>Domicilios a todo Cali todo los días</li>
       </ul>
+    </div>
+  </section>
+
+  <!-- ======================================
+       PRODUCTOS DESTACADOS
+       Se renderiza desde MENU (JS) según la lista DESTACADOS.
+  ======================================= -->
+  <section id="destacados" class="destacados" aria-labelledby="destacadosTitulo">
+    <div class="contenedor">
+      <div class="destacados-intro">
+        <p class="eyebrow">Para empezar</p>
+        <h2 id="destacadosTitulo">Productos destacados</h2>
+        <p>Tres opciones del menú para que empieces a antojarte.</p>
+      </div>
+      <ul class="destacados-grid" id="destacadosGrid"></ul>
     </div>
   </section>
 
@@ -2370,31 +2424,30 @@ const MENU = [
     categoria: "PROMOS",
     icono: "🎉",
     productos: [
-      { nombre: "Combo Familiar Wario (Bacon)", desc: "4 Wario Burger con tocineta, 4 papas a la francesa y 1 gaseosa litro Postobón.", imagen: "img/products/combo-familiar-wario-bacon.webp", precio: 63900, personas: 4 },
-      { nombre: "Combo Parejas", desc: "2 Wario Burger, 2 limonadas, 1 papas a la francesa con tocineta y queso cheddar. ¡Gratis 1 copa de helado!", imagen: "img/products/combo-parejas.webp", precio: 37900, personas: 2 },
-      { nombre: "2x1 Wario Burger", desc: "2 hamburguesas con carne de res tradicional, papas a la francesa, acompañadas con salsa caleña.", imagen: "img/products/2x1-wario-burger.webp", precio: 28000, personas: 2 }
+      { nombre: "Combo Familiar Wario (Bacon)", desc: "4 Wario Burger con tocineta, 4 papas a la francesa y 1 gaseosa litro Postobón.", imagen: "img/products/combo-familiar-wario-bacon.webp", precio: 67000, personas: 4 },
+      { nombre: "Combo Parejas", desc: "2 Wario Burger, 2 limonadas, 1 papas a la francesa con tocineta y queso cheddar. ¡Gratis 1 copa de helado!", imagen: "img/products/combo-parejas.webp", precio: 40000, personas: 2 },
+      { nombre: "2x1 Wario Burger", desc: "2 hamburguesas con carne de res tradicional, papas a la francesa, acompañadas con salsa caleña.", imagen: "img/products/2x1-wario-burger.webp", precio: 28000, personas: 2 },
+      { nombre: "2x1 Big Angus Burger", desc: "2 Hamburguesas BIG Burger, con carne 100% Black Angus de 140 grs, importada, con papas a la francesa y nuestra salsa Caleña.", imagen: "img/products/2x1-big-angus-burger.webp", precio: 39400 }
     ]
   },
   {
     categoria: "PREMIUM BURGERS",
     icono: "🍔",
-    sub: "Generación Crystal",
     productos: [
       { nombre: "Generación Crystal", desc: "Doble carne angus 200g, pan artesanal de orégano, doble queso cheddar, doble tocino ahumado pork, cebolla crispy, salsa de maracuyá, lechuga y tomates frescos, papas a la francesa y salsa caleña.", imagen: "img/products/generacion-crystal.webp", precio: 29900 },
       { nombre: "Generación Milenials", desc: "Carne angus 140g, pan artesanal, quesillo, costilla carnuda, pepinillos dulces, cebolla caramelizada, salsa de maracuyá, lechuga fresca, papas a la francesa y salsa caleña.", imagen: "img/products/generacion-milenials.webp", precio: 25900 },
       { nombre: "Generación X", desc: "Carne angus 140g, pan artesanal, doble queso mozarella, tocino ahumado pork, cebolla encurtida en salsa de arrechón, lechuga fresca, papas a la francesa y salsa con sabor a Cali.", imagen: "img/products/generacion-x.webp", precio: 25900 },
-      { nombre: "American Angus", desc: "Pan artesanal a las finas hierbas, 140g de carne 100% Angus, tocino ahumado, queso cheddar, lechuga crespa, tomates frescos, cebolla crispy, papas a la francesa y salsa de la casa.", imagen: "img/products/american-angus.webp", precio: 25900 }
+      { nombre: "American Angus", desc: "Pan artesanal a las finas hierbas, 140g de carne 100% Angus, tocino ahumado, queso cheddar, lechuga crespa, tomates frescos, cebolla crispy, papas a la francesa y salsa de la casa.", imagen: "img/products/american-angus.webp", precio: 26900 }
     ]
   },
   {
     categoria: "CLASIC BURGERS",
     icono: "🍔",
-    sub: "Wario Golden",
     productos: [
-      { nombre: "Wario Golden", desc: "Pan brioche con ajonjolí black, 140g de res, tocino ahumado, ripio de papa, cebolla caramelizada, lechuga crespa, 160g de queso doble crema fundido enchapado en oro, papas a la francesa y salsa caleña.", imagen: "img/products/wario-golden.webp", precio: 26900 },
+      { nombre: "Wario Golden", desc: "Pan brioche con ajonjolí black, 140g de res, tocino ahumado, ripio de papa, cebolla caramelizada, lechuga crespa, 160g de queso doble crema fundido enchapado en oro, papas a la francesa y salsa caleña.", imagen: "img/products/wario-golden.webp", precio: 27900 },
       { nombre: "Triple Mela", desc: "Pan artesanal de orégano, 140g de res, costilla, tocino ahumado, maduritos, queso cheddar, cebolla crispy, lechuga crespa, papas a la francesa y salsa caleña.", imagen: "img/products/triple-mela.webp", precio: 25900 },
-      { nombre: "Chicken Express", desc: "Pan artesanal a las finas hierbas, 120g de pollo asado en trocitos, tocino ahumado, ripio de papa, lechuga crespa, cebolla caramelizada, queso cheddar, papas a la francesa y salsa con sabor a Cali.", imagen: "img/products/chicken-express.webp", precio: 21900 },
-      { nombre: "American Express", desc: "Pan artesanal a las finas hierbas, 140g de res, tocino ahumado, ripio de papa, lechuga crespa, cebolla caramelizada, queso cheddar, papas a la francesa y salsa con sabor a Cali.", imagen: "img/products/american-express.webp", precio: 19900 }
+      { nombre: "Chicken Express", desc: "Pan artesanal a las finas hierbas, 120g de pollo asado en trocitos, tocino ahumado, ripio de papa, lechuga crespa, cebolla caramelizada, queso cheddar, papas a la francesa y salsa con sabor a Cali.", imagen: "img/products/chicken-express.webp", precio: 23900 },
+      { nombre: "American Express", desc: "Pan artesanal a las finas hierbas, 140g de res, tocino ahumado, ripio de papa, lechuga crespa, cebolla caramelizada, queso cheddar, papas a la francesa y salsa con sabor a Cali.", imagen: "img/products/american-express.webp", precio: 21900 }
     ]
   },
   {
@@ -2423,7 +2476,7 @@ const MENU = [
       { nombre: "Salvajada Wario", desc: "Para 3 personas. Pollo, res, costilla ahumada sin hueso, ripio de papa, queso mozarella rayado y salsa caleña.", imagen: "img/products/salvajada-wario.webp", precio: 44900, personas: 3 },
       { nombre: "Mexicali", desc: "Para 2 personas. Entrada de nachos con guacamole, pollo desmechado con pico de gallo, costillas a la BBQ sweet, queso mozarella y salsas.", imagen: "img/products/mexicali.webp", precio: 40900, personas: 2 },
       { nombre: "Salvajada Special", desc: "Para 2 personas. Trocitos de pollo y res, ripio de papa, queso mozarella rayado y salsa caleña.", imagen: "img/products/salvajada-especial.webp", precio: 34900, personas: 2 },
-      { nombre: "Salchi Personal", desc: "Personal, con ripio de papa, queso mozarella rayado, salchicha, papas fritas y salsa caleña.", imagen: "img/products/salchi-personal.webp", precio: 14000 }
+      { nombre: "Salchi Personal", desc: "Personal, con ripio de papa, queso mozarella rayado, salchicha, papas fritas y salsa caleña.", imagen: "img/products/salchi-personal.webp", precio: 15000 }
     ]
   },
   {
@@ -2431,7 +2484,7 @@ const MENU = [
     icono: "🔥",
     productos: [
       { nombre: "Picada para 4 Personas", desc: "Costilla, chorizo, pollo, res, cerdo, moneditas de plátano, papas a la francesa y ensalada mixta.", imagen: "img/products/picada-para-4-personas.webp", precio: 75000, personas: 4 },
-      { nombre: "Picada para 2 Personas", desc: "Costilla, chorizo, pollo, res, cerdo, papas a la francesa y ensalada mixta.", imagen: "img/products/picada-para-2-personas.webp", precio: 40000, personas: 2 },
+      { nombre: "Picada para 2 Personas", desc: "Costilla, chorizo, pollo, res, cerdo, papas a la francesa y ensalada mixta.", imagen: "img/products/picada-para-2-personas.webp", precio: 45000, personas: 2 },
       { nombre: "Punta de Anca", desc: "Charcoal-Grilled. Corte de punta de anca de 300g, croquetas de yuca frita y ensalada mixta, acompañadas con chimichurri y guacamole.", imagen: "img/products/punta-de-anca.webp", precio: 39900 },
       { nombre: "Churrasco Argentino", desc: "Sirloin Steak. Corte de lomo caracha de 300g, croquetas de yuca frita y ensalada mixta, acompañadas con chimichurri y guacamole.", imagen: "img/products/churrasco-argentino.webp", precio: 36900 },
       { nombre: "Costillas BBQ Sweet", desc: "Carne de costilla de 250g, croquetas de yuca, BBQ sweet, guacamole o salsa caleña.", imagen: "img/products/costillas-bbq-sweet.webp", precio: 24900 },
@@ -2630,6 +2683,80 @@ function renderizarMenu(){
 
 renderizarCategoriasNav();
 renderizarMenu();
+
+/* ============================================================
+   PRODUCTOS DESTACADOS
+   Para cambiar los destacados, edita solo esta lista (nombres
+   exactos del array MENU). Precio, foto y descripción salen de MENU.
+============================================================= */
+const DESTACADOS = ["Combo Parejas", "2x1 Big Angus Burger", "Generación Crystal"];
+
+function buscarProductoPorNombre(nombre){
+  for(let c = 0; c < MENU.length; c++){
+    for(let p = 0; p < MENU[c].productos.length; p++){
+      if(MENU[c].productos[p].nombre === nombre){
+        return { cat: MENU[c], prod: MENU[c].productos[p], id: generarIdProducto(c, p) };
+      }
+    }
+  }
+  return null;
+}
+
+function renderizarDestacados(){
+  const grid = document.getElementById('destacadosGrid');
+  if(!grid) return;
+  DESTACADOS.forEach(function(nombre){
+    const hallado = buscarProductoPorNombre(nombre);
+    if(!hallado) return; /* nombre no encontrado: se omite en vez de mostrar datos falsos */
+    const cat = hallado.cat, prod = hallado.prod;
+
+    const li = document.createElement('li');
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.className = 'destacado-card';
+    boton.setAttribute('aria-label', 'Ver detalles de ' + prod.nombre + ', ' + formatoCOP(prod.precio));
+
+    const media = document.createElement('span');
+    media.className = 'destacado-media';
+    if(prod.imagen){
+      const img = document.createElement('img');
+      img.src = prod.imagen; img.alt = prod.nombre; img.loading = 'lazy';
+      img.width = 400; img.height = 300;
+      media.appendChild(img);
+    } else {
+      media.textContent = cat.icono;
+    }
+    boton.appendChild(media);
+
+    const info = document.createElement('span');
+    info.className = 'destacado-info';
+    if(prod.personas){
+      const badge = document.createElement('span');
+      badge.className = 'producto-badge';
+      badge.textContent = 'Para ' + prod.personas + ' personas';
+      info.appendChild(badge);
+    }
+    const n = document.createElement('span');
+    n.className = 'destacado-nombre'; n.textContent = prod.nombre;
+    info.appendChild(n);
+    if(prod.desc){
+      const d = document.createElement('span');
+      d.className = 'destacado-desc'; d.textContent = prod.desc;
+      info.appendChild(d);
+    }
+    const pr = document.createElement('span');
+    pr.className = 'destacado-precio'; pr.textContent = formatoCOP(prod.precio);
+    info.appendChild(pr);
+    boton.appendChild(info);
+
+    boton.addEventListener('click', function(){
+      abrirDetalleProducto(cat, prod, boton, hallado.id);
+    });
+    li.appendChild(boton);
+    grid.appendChild(li);
+  });
+}
+renderizarDestacados();
 
 /* ============================================================
    RENDER DE RESEÑAS + CARRUSEL CONTINUO
