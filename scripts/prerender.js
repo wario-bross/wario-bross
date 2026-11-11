@@ -2,12 +2,12 @@
 /* ============================================================
    PRE-RENDERIZADO GEO/AEO — Wario Bross
    Lee los datos reales (MENU, RESENAS, DESTACADOS, CONFIG) de
-   index.html y escribe el HTML estático equivalente entre los
+   js/datos.js y escribe en index.html el HTML estático equivalente entre los
    marcadores <!--PRERENDER:X:START--> ... <!--PRERENDER:X:END-->.
 
    Así los rastreadores que NO ejecutan JavaScript (GPTBot,
    ClaudeBot, PerplexityBot...) ven menú, precios, reseñas y
-   horarios en el HTML. En el navegador, el JS vuelve a dibujar
+   horarios en el HTML. En el navegador, js/app.js vuelve a dibujar
    las mismas secciones desde las mismas constantes.
 
    Uso (desde la carpeta del proyecto):   node scripts/prerender.js
@@ -18,21 +18,23 @@ const path = require('path');
 const vm = require('vm');
 
 const ARCHIVO = path.join(__dirname, '..', 'index.html');
+const ARCHIVO_DATOS = path.join(__dirname, '..', 'js', 'datos.js');
 let html = fs.readFileSync(ARCHIVO, 'utf8');
+const datosTxt = fs.readFileSync(ARCHIVO_DATOS, 'utf8');
 
-/* ---------- 1) Extraer las constantes de datos del <script> ---------- */
+/* ---------- 1) Extraer las constantes de datos de js/datos.js ---------- */
 function extraer(nombre, inicio, fin){
-  const i = html.indexOf(inicio);
+  const i = datosTxt.indexOf(inicio);
   if(i === -1) throw new Error('No se encontró ' + nombre);
-  const j = html.indexOf(fin, i);
+  const j = datosTxt.indexOf(fin, i);
   if(j === -1) throw new Error('No se encontró el final de ' + nombre);
-  const expr = html.slice(i + inicio.length, j + 2); /* incluye el cierre ] o } */
+  const expr = datosTxt.slice(i + inicio.length, j + 2); /* incluye el cierre ] o } */
   return vm.runInNewContext('(' + expr + ')');
 }
 const CONFIG = extraer('CONFIG', 'const CONFIG = Object.freeze(', '\n});');
 const MENU = extraer('MENU', 'const MENU = ', '\n];');
 const RESENAS = extraer('RESENAS', 'const RESENAS = ', '\n];');
-const mDest = html.match(/const DESTACADOS = (\[.*?\]);/);
+const mDest = datosTxt.match(/const DESTACADOS = (\[.*?\]);/);
 if(!mDest) throw new Error('No se encontró DESTACADOS');
 const DESTACADOS = vm.runInNewContext(mDest[1]);
 
@@ -132,17 +134,28 @@ const nombres = MENU.flatMap(c => c.productos.map(p => p.nombre));
 nombres.filter((n, i) => nombres.indexOf(n) !== i).forEach(n => aviso('Nombre de producto repetido: ' + n));
 DESTACADOS.filter(n => !buscar(n)).forEach(n => aviso('DESTACADOS contiene un nombre que no existe en MENU: ' + n));
 
-/* b) JSON-LD (hasMenu) vs MENU: mismos productos y mismos precios */
+/* b) JSON-LD (hasMenu): los PRECIOS se sincronizan solos desde MENU.
+      Si un producto de MENU no existe en el JSON-LD (o al revés), avisa: eso sí requiere edición manual. */
 const mLd = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
 if(mLd){
   const ld = JSON.parse(mLd[1]);
-  const ldPrecios = new Map();
-  (ld.hasMenu.hasMenuSection || []).forEach(s => (s.hasMenuItem || []).forEach(it => ldPrecios.set(it.name, it.offers.price)));
-  MENU.forEach(c => c.productos.forEach(p => {
-    if(!ldPrecios.has(p.nombre)) aviso('Falta en el JSON-LD: ' + p.nombre);
-    else if(ldPrecios.get(p.nombre) !== p.precio) aviso('Precio distinto en JSON-LD para ' + p.nombre + ': MENU ' + p.precio + ' vs JSON-LD ' + ldPrecios.get(p.nombre));
+  const precios = new Map();
+  MENU.forEach(c => c.productos.forEach(p => precios.set(p.nombre, p.precio)));
+  const ldNombres = new Set();
+  let actualizados = 0;
+  (ld.hasMenu.hasMenuSection || []).forEach(s => (s.hasMenuItem || []).forEach(it => {
+    ldNombres.add(it.name);
+    if(!precios.has(it.name)){ aviso('Producto en JSON-LD que ya no está en MENU: ' + it.name); return; }
+    if(it.offers.price !== precios.get(it.name)){
+      console.log('🔄 JSON-LD actualizado: ' + it.name + ' ' + it.offers.price + ' → ' + precios.get(it.name));
+      it.offers.price = precios.get(it.name);
+      actualizados++;
+    }
   }));
-  ldPrecios.forEach((_, n) => { if(!nombres.includes(n)) aviso('Producto en JSON-LD que ya no está en MENU: ' + n); });
+  nombres.forEach(n => { if(!ldNombres.has(n)) aviso('Falta en el JSON-LD (agregar a mano): ' + n); });
+  if(actualizados){
+    html = html.replace(mLd[0], '<script type="application/ld+json">\n' + JSON.stringify(ld, null, 2) + '\n</script>');
+  }
 }
 
 /* c) Las imágenes referenciadas existen en la carpeta img/ (si está presente) */
